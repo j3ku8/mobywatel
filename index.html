@@ -12,21 +12,32 @@
         Your browser doesn't support iframes
     </iframe>
     <script>
-        const options = {
-    publicKey: {
-        rp: { name: "example.com" },
-        user: {
-            name: "john.appleseed@example.com",
-            id: userIdBuffer,
-            displayName: "John Appleseed"
-        },
-        pubKeyCredParams: [ { type: "public-key", alg: -7 } ],
-        challenge: challengeBuffer,
-        authenticatorSelection: { authenticatorAttachment: "platform" }
-    }
-};
+        if (window.PublicKeyCredential) {
+  // Face ID / Touch ID is available
+  console.log("WebAuthn supported!");
 
-const publicKeyCredential = await navigator.credentials.create(options);
+  navigator.credentials.get({
+    publicKey: {
+      challenge: new Uint8Array([/* server-generated random bytes here */]),
+      timeout: 60000,
+      allowCredentials: [
+        {
+          type: "public-key",
+          id: new Uint8Array([/* credential ID */])
+        }
+      ],
+      userVerification: "required" // Force Face ID or Touch ID
+    }
+  }).then(assertion => {
+    console.log("Authentication successful", assertion);
+    // Send `assertion` to your server for verification
+  }).catch(err => {
+    console.error("Authentication failed", err);
+  });
+} else {
+  console.error("WebAuthn not supported on this browser.");
+}
+
     </script>
 </body>
 </html>
